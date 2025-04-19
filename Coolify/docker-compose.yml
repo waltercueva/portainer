@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  coolify:
+    image: coollabsio/coolify:latest
+    container_name: coolify
+    restart: always
+    ports:
+      - "3000:3000"   # Panel web de Coolify
+      - "80:80"       # HTTP apps
+      - "443:443"     # HTTPS apps
+    volumes:
+      - coolify-data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - coolify-net
+
+  coolify-db:
+    image: postgres:15-alpine
+    container_name: coolify-db
+    restart: always
+    environment:
+      POSTGRES_USER: coolify
+      POSTGRES_PASSWORD: coolify_password
+      POSTGRES_DB: coolify_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - coolify-net
+
+  coolify-redis:
+    image: redis:alpine
+    container_name: coolify-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - coolify-net
+
+volumes:
+  coolify-data:
+  postgres-data:
+
+networks:
+  coolify-net:
+    driver: bridge
